@@ -78,9 +78,6 @@ export default function ProcessPage() {
       <div className="flex min-h-screen flex-col">
         <Header />
         <main className="flex-1">
-  return (
-  return (
-    <>
       <section className="bg-gray-50 py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
@@ -159,14 +156,6 @@ export default function ProcessPage() {
           </Button>
         </div>
       </section>
-    </>
-  )
-        </main>
-        <Footer />
-      </div>
-      <WhatsAppButton />
-    </ThemeProvider>
-  )
         </main>
         <Footer />
       </div>

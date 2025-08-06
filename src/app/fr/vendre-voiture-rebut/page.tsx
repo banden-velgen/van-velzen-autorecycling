@@ -213,13 +213,6 @@ export default function VendreVoitureRebut() {
         </div>
       </div>
     </div>
-  )
-        </main>
-        <Footer />
-      </div>
-      <WhatsAppButton />
-    </ThemeProvider>
-  )
         </main>
         <Footer />
       </div>

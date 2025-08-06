@@ -16,7 +16,7 @@ const LicensePlateInput = forwardRef<HTMLInputElement, LicensePlateInputProps>(
           <div className="w-16 bg-blue-600 flex flex-col items-center justify-center relative">
             {/* EU Stars Circle */}
             <div className="flex items-center justify-center mb-1">
-              <svg viewBox="0 0 24 24" className="w-4 h-4">
+              <svg viewBox="0 0 24 24" className="w-5 h-5">
                 <circle cx="12" cy="12" r="12" fill="#003399" />
                 {[...Array(12)].map((_, i) => {
                   const angle = (i * 30 * Math.PI) / 180
@@ -27,7 +27,7 @@ const LicensePlateInput = forwardRef<HTMLInputElement, LicensePlateInputProps>(
                       key={i}
                       cx={x}
                       cy={y}
-                      r="1.2"
+                      r="1.8"
                       fill="#FFCC00"
                     />
                   )
@@ -35,7 +35,7 @@ const LicensePlateInput = forwardRef<HTMLInputElement, LicensePlateInputProps>(
               </svg>
             </div>
             {/* NL Text */}
-            <span className="text-white text-xs font-bold">NL</span>
+            <span className="text-white text-[10px] font-bold">NL</span>
           </div>
           
           {/* Yellow License Plate Section */}

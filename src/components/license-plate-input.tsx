@@ -16,17 +16,23 @@ const LicensePlateInput = forwardRef<HTMLInputElement, LicensePlateInputProps>(
           <div className="w-16 bg-blue-600 flex items-center justify-center relative">
             {/* EU Stars */}
             <div className="absolute inset-0 flex items-center justify-center">
-              <div className="flex space-x-0.5">
-                {[...Array(12)].map((_, i) => (
-                  <div
-                    key={i}
-                    className="w-1 h-1 bg-yellow-400 rounded-full"
-                    style={{
-                      transform: `rotate(${i * 30}deg) translateY(-2px)`,
-                    }}
-                  />
-                ))}
-              </div>
+              <svg viewBox="0 0 24 24" className="w-5 h-5">
+                <circle cx="12" cy="12" r="12" fill="#003399" />
+                {[...Array(12)].map((_, i) => {
+                  const angle = (i * 30 * Math.PI) / 180
+                  const x = 12 + 8 * Math.sin(angle)
+                  const y = 12 - 8 * Math.cos(angle)
+                  return (
+                    <circle
+                      key={i}
+                      cx={x}
+                      cy={y}
+                      r="1.2"
+                      fill="#FFCC00"
+                    />
+                  )
+                })}
+              </svg>
             </div>
             {/* NL Text */}
             <span className="text-white text-xs font-bold z-10">NL</span>

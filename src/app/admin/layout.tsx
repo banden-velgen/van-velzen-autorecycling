@@ -1,7 +1,8 @@
 import type React from "react"
 import type { Metadata } from "next"
 import { redirect } from "next/navigation"
-import { createClient } from "@/lib/supabase/server"
+import { cookies } from "next/headers"
+import { verifyToken } from "@/lib/auth/neon-auth"
 
 import { MainNav } from "@/components/main-nav"
 import { DashboardNav } from "@/components/dashboard-nav"
@@ -18,14 +19,16 @@ interface DashboardLayoutProps {
 }
 
 export default async function DashboardLayout({ children }: DashboardLayoutProps) {
-  const supabase = await createClient()
+  const cookieStore = await cookies()
+  const token = cookieStore.get('auth-token')?.value
 
-  const {
-    data: { session },
-  } = await supabase.auth.getSession()
+  if (!token) {
+    redirect("/admin/login")
+  }
 
-  if (!session) {
-    redirect("/login")
+  const user = verifyToken(token)
+  if (!user) {
+    redirect("/admin/login")
   }
 
   return (

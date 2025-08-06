@@ -1,8 +1,8 @@
+"use client"
+
+import { useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
 import type React from "react"
-import type { Metadata } from "next"
-import { redirect } from "next/navigation"
-import { cookies } from "next/headers"
-import { verifyToken } from "@/lib/auth/neon-auth"
 import { Home, FileText, Car, Users, Calendar, Recycle, FolderOpen, Package } from "lucide-react"
 
 import { MainNav } from "@/components/main-nav"
@@ -10,33 +10,47 @@ import { DashboardNav } from "@/components/dashboard-nav"
 import { UserNav } from "@/components/user-nav"
 import { ModeToggle } from "@/components/mode-toggle"
 
-export const metadata: Metadata = {
-  title: "Dashboard | Van Velzen Autorecycling Admin",
-  description: "Beheer uw autorecycling bedrijf",
-}
-
 interface DashboardLayoutProps {
   children: React.ReactNode
 }
 
-export default async function DashboardLayout({ children }: DashboardLayoutProps) {
-  // Check authentication for dashboard
-  const cookieStore = await cookies()
-  const token = cookieStore.get('auth-token')?.value
+interface User {
+  name: string
+  email: string
+  role: string
+}
 
-  if (!token) {
-    redirect("/admin/login")
-  }
+export default function DashboardLayout({ children }: DashboardLayoutProps) {
+  const [user, setUser] = useState<User | null>(null)
+  const [loading, setLoading] = useState(true)
+  const router = useRouter()
 
-  const user = verifyToken(token)
-  if (!user) {
-    redirect("/admin/login")
-  }
+  useEffect(() => {
+    // Check authentication on client side
+    const checkAuth = async () => {
+      try {
+        const response = await fetch('/api/auth/verify', {
+          method: 'GET',
+          credentials: 'include'
+        })
 
-  // Ensure user has admin permissions
-  if (!user.role || (user.role !== 'admin' && user.role !== 'super_admin')) {
-    redirect("/admin/login")
-  }
+        if (response.ok) {
+          const userData = await response.json()
+          setUser(userData.user)
+        } else {
+          // Redirect to login if not authenticated
+          router.push('/admin/login')
+        }
+      } catch (error) {
+        console.error('Auth check failed:', error)
+        router.push('/admin/login')
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    checkAuth()
+  }, [router])
 
   // Navigation items for the dashboard
   const navItems = [
@@ -81,6 +95,21 @@ export default async function DashboardLayout({ children }: DashboardLayoutProps
       icon: Package,
     },
   ]
+
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (!user) {
+    return null // Will redirect to login
+  }
 
   return (
     <div className="flex min-h-screen flex-col">

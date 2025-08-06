@@ -4,6 +4,10 @@ import { Card, CardContent } from "@/components/ui/card"
 import Link from "next/link"
 import Image from "next/image"
 import QuoteForm from "@/components/quote-form"
+import Header from "@/components/header"
+import Footer from "@/components/footer"
+import WhatsAppButton from "@/components/whatsapp-button"
+import { ThemeProvider } from "@/components/theme-provider"
 
 export const metadata: Metadata = {
   title: "Vendre voiture de rebut ? Argent direct et collecte gratuite | Van Velzen Autorecycling",
@@ -32,6 +36,12 @@ export const metadata: Metadata = {
 }
 
 export default function VendreVoitureRebut() {
+  return (
+    <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
+      <div className="flex min-h-screen flex-col">
+        <Header />
+        <main className="flex-1">
+  return (
   return (
     <div className="container mx-auto px-4 py-12">
       {/* Hero Section */}
@@ -204,4 +214,16 @@ export default function VendreVoitureRebut() {
       </div>
     </div>
   )
-} 
+        </main>
+        <Footer />
+      </div>
+      <WhatsAppButton />
+    </ThemeProvider>
+  )
+        </main>
+        <Footer />
+      </div>
+      <WhatsAppButton />
+    </ThemeProvider>
+  )
+}

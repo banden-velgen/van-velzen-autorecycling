@@ -3,6 +3,10 @@ import Link from "next/link"
 import { ArrowRight, PhoneCall, Truck, FileCheck, CreditCard, Recycle } from "lucide-react"
 import type { Metadata } from "next"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import Header from "@/components/header"
+import Footer from "@/components/footer"
+import WhatsAppButton from "@/components/whatsapp-button"
+import { ThemeProvider } from "@/components/theme-provider"
 
 export const metadata: Metadata = {
   title: "Process | Van Velzen Autorecycling",
@@ -69,6 +73,12 @@ const steps = [
 ]
 
 export default function ProcessPage() {
+  return (
+    <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
+      <div className="flex min-h-screen flex-col">
+        <Header />
+        <main className="flex-1">
+  return (
   return (
     <>
       <section className="bg-gray-50 py-16">
@@ -151,4 +161,16 @@ export default function ProcessPage() {
       </section>
     </>
   )
-} 
+        </main>
+        <Footer />
+      </div>
+      <WhatsAppButton />
+    </ThemeProvider>
+  )
+        </main>
+        <Footer />
+      </div>
+      <WhatsAppButton />
+    </ThemeProvider>
+  )
+}

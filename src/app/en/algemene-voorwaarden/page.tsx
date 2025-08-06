@@ -1,4 +1,8 @@
 import type { Metadata } from "next"
+import Header from "@/components/header"
+import Footer from "@/components/footer"
+import WhatsAppButton from "@/components/whatsapp-button"
+import { ThemeProvider } from "@/components/theme-provider"
 
 export const metadata: Metadata = {
   title: "Terms and Conditions | Van Velzen Autorecycling",
@@ -15,6 +19,12 @@ export const metadata: Metadata = {
 }
 
 export default function TermsAndConditionsPage() {
+  return (
+    <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
+      <div className="flex min-h-screen flex-col">
+        <Header />
+        <main className="flex-1">
+  return (
   const lastUpdated = new Date().toLocaleDateString("en-US", {
     year: "numeric",
     month: "long",
@@ -286,4 +296,16 @@ export default function TermsAndConditionsPage() {
       </div>
     </main>
   )
-} 
+        </main>
+        <Footer />
+      </div>
+      <WhatsAppButton />
+    </ThemeProvider>
+  )
+        </main>
+        <Footer />
+      </div>
+      <WhatsAppButton />
+    </ThemeProvider>
+  )
+}

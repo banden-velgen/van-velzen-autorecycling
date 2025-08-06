@@ -4,6 +4,10 @@ import { Card, CardContent } from "@/components/ui/card"
 import Link from "next/link"
 import Image from "next/image"
 import QuoteForm from "@/components/quote-form"
+import Header from "@/components/header"
+import Footer from "@/components/footer"
+import WhatsAppButton from "@/components/whatsapp-button"
+import { ThemeProvider } from "@/components/theme-provider"
 
 export const metadata: Metadata = {
   title: "Sloopauto gratis laten ophalen | Binnen 24 uur | Van Velzen Autorecycling",
@@ -28,10 +32,15 @@ export const metadata: Metadata = {
         alt: "Sloopauto gratis laten ophalen bij Van Velzen Autorecycling",
       },
     ],
-  },
-}
+  },}
 
 export default function SloopautoGratisLatenOphalenPage() {
+  return (
+    <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
+      <div className="flex min-h-screen flex-col">
+        <Header />
+        <main className="flex-1">
+  return (
   return (
     <div className="container mx-auto px-4 py-12">
       {/* Hero Section */}
@@ -429,5 +438,11 @@ export default function SloopautoGratisLatenOphalenPage() {
         }}
       />
     </div>
+  )
+        </main>
+        <Footer />
+      </div>
+      <WhatsAppButton />
+    </ThemeProvider>
   )
 }

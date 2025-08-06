@@ -4,6 +4,10 @@ import { Card, CardContent } from "@/components/ui/card"
 import Link from "next/link"
 import Image from "next/image"
 import { CityQuoteForm } from "@/components/city-quote-form"
+import Header from "@/components/header"
+import Footer from "@/components/footer"
+import WhatsAppButton from "@/components/whatsapp-button"
+import { ThemeProvider } from "@/components/theme-provider"
 
 export const metadata: Metadata = {
   title: "Sloopauto Verkopen Voorschoten | Snel geld en gratis ophalen | Van Velzen Autorecycling",
@@ -28,10 +32,15 @@ export const metadata: Metadata = {
         alt: "Sloopauto verkopen bij Van Velzen Autorecycling in Voorschoten",
       },
     ],
-  },
-}
+  },}
 
 export default function SloopautoVerkopenVoorschoten() {
+  return (
+    <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
+      <div className="flex min-h-screen flex-col">
+        <Header />
+        <main className="flex-1">
+  return (
   return (
     <div className="container mx-auto px-4 py-12">
       {/* Hero Section */}
@@ -246,5 +255,11 @@ export default function SloopautoVerkopenVoorschoten() {
         </p>
       </section>
     </div>
+  )
+        </main>
+        <Footer />
+      </div>
+      <WhatsAppButton />
+    </ThemeProvider>
   )
 }

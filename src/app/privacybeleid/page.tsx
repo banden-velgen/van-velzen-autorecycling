@@ -1,4 +1,8 @@
 import type { Metadata } from "next"
+import Header from "@/components/header"
+import Footer from "@/components/footer"
+import WhatsAppButton from "@/components/whatsapp-button"
+import { ThemeProvider } from "@/components/theme-provider"
 
 export const metadata: Metadata = {
   title: "Privacybeleid | Van Velzen Autorecycling",
@@ -11,10 +15,15 @@ export const metadata: Metadata = {
     title: "Privacybeleid | Van Velzen Autorecycling",
     description: "Informatie over hoe wij uw persoonlijke gegevens verzamelen, gebruiken en beschermen.",
     url: "/privacybeleid",
-  },
-}
+  },}
 
 export default function PrivacyBeleidPage() {
+  return (
+    <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
+      <div className="flex min-h-screen flex-col">
+        <Header />
+        <main className="flex-1">
+  return (
   return (
     <main className="bg-white py-16">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl">
@@ -288,5 +297,11 @@ export default function PrivacyBeleidPage() {
         </div>
       </div>
     </main>
+  )
+        </main>
+        <Footer />
+      </div>
+      <WhatsAppButton />
+    </ThemeProvider>
   )
 }

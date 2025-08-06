@@ -1,5 +1,9 @@
 import Link from "next/link"
 import type { Metadata } from "next"
+import Header from "@/components/header"
+import Footer from "@/components/footer"
+import WhatsAppButton from "@/components/whatsapp-button"
+import { ThemeProvider } from "@/components/theme-provider"
 
 export const metadata: Metadata = {
   title: "Cookiebeleid | Van Velzen Autorecycling",
@@ -12,10 +16,15 @@ export const metadata: Metadata = {
     title: "Cookiebeleid | Van Velzen Autorecycling",
     description: "Informatie over hoe wij cookies gebruiken om uw ervaring op onze website te verbeteren.",
     url: "/cookiebeleid",
-  },
-}
+  },}
 
 export default function CookieBeleidPage() {
+  return (
+    <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
+      <div className="flex min-h-screen flex-col">
+        <Header />
+        <main className="flex-1">
+  return (
   return (
     <main className="bg-white py-16">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl">
@@ -258,5 +267,11 @@ export default function CookieBeleidPage() {
         </div>
       </div>
     </main>
+  )
+        </main>
+        <Footer />
+      </div>
+      <WhatsAppButton />
+    </ThemeProvider>
   )
 }

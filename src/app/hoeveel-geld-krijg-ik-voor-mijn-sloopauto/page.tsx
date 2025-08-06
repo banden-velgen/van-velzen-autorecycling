@@ -3,6 +3,10 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { QuoteForm } from "@/components/quote-form"
 import { Check, Phone, Mail, MessageSquare, Scale, Car, Wrench, TrendingUp, Clipboard } from "lucide-react"
+import Header from "@/components/header"
+import Footer from "@/components/footer"
+import WhatsAppButton from "@/components/whatsapp-button"
+import { ThemeProvider } from "@/components/theme-provider"
 
 export const metadata: Metadata = {
   title: "Hoeveel geld krijg ik voor mijn sloopauto? | Vraag direct een offerte aan",
@@ -28,10 +32,15 @@ export const metadata: Metadata = {
     siteName: "Van Velzen Autorecycling",
     locale: "nl_NL",
     type: "website",
-  },
-}
+  },}
 
 export default function HoeveelGeldKrijgIkVoorMijnSloopautoPage() {
+  return (
+    <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
+      <div className="flex min-h-screen flex-col">
+        <Header />
+        <main className="flex-1">
+  return (
   return (
     <div className="container mx-auto px-4 py-8">
       {/* Hero Section */}
@@ -359,5 +368,11 @@ export default function HoeveelGeldKrijgIkVoorMijnSloopautoPage() {
         </Button>
       </section>
     </div>
+  )
+        </main>
+        <Footer />
+      </div>
+      <WhatsAppButton />
+    </ThemeProvider>
   )
 }

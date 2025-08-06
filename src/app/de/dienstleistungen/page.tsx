@@ -3,6 +3,10 @@ import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { ArrowRight, Car, Truck, FileCheck, Recycle, Euro } from "lucide-react"
 import type { Metadata } from "next"
+import Header from "@/components/header"
+import Footer from "@/components/footer"
+import WhatsAppButton from "@/components/whatsapp-button"
+import { ThemeProvider } from "@/components/theme-provider"
 
 export const metadata: Metadata = {
   title: "Dienstleistungen | Van Velzen Autorecycling",
@@ -21,6 +25,12 @@ export const metadata: Metadata = {
 }
 
 export default function ServicesPage() {
+  return (
+    <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
+      <div className="flex min-h-screen flex-col">
+        <Header />
+        <main className="flex-1">
+  return (
   return (
     <>
       <section className="bg-gray-50 py-16">
@@ -382,4 +392,16 @@ export default function ServicesPage() {
       </section>
     </>
   )
-} 
+        </main>
+        <Footer />
+      </div>
+      <WhatsAppButton />
+    </ThemeProvider>
+  )
+        </main>
+        <Footer />
+      </div>
+      <WhatsAppButton />
+    </ThemeProvider>
+  )
+}

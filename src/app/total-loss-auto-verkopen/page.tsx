@@ -4,6 +4,10 @@ import { Card, CardContent } from "@/components/ui/card"
 import Link from "next/link"
 import Image from "next/image"
 import QuoteForm from "@/components/quote-form"
+import Header from "@/components/header"
+import Footer from "@/components/footer"
+import WhatsAppButton from "@/components/whatsapp-button"
+import { ThemeProvider } from "@/components/theme-provider"
 
 export const metadata: Metadata = {
   title: "Total loss auto verkopen | Hoogste prijs | Van Velzen Autorecycling",
@@ -28,10 +32,15 @@ export const metadata: Metadata = {
         alt: "Total Loss Auto Verkopen bij Van Velzen Autorecycling",
       },
     ],
-  },
-}
+  },}
 
 export default function TotalLossAutoVerkopen() {
+  return (
+    <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
+      <div className="flex min-h-screen flex-col">
+        <Header />
+        <main className="flex-1">
+  return (
   return (
     <div className="container mx-auto px-4 py-12">
       {/* Hero Section */}
@@ -439,5 +448,11 @@ export default function TotalLossAutoVerkopen() {
         </Button>
       </section>
     </div>
+  )
+        </main>
+        <Footer />
+      </div>
+      <WhatsAppButton />
+    </ThemeProvider>
   )
 }

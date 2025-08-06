@@ -277,3 +277,6 @@ export default function QuoteFormComponent() {
     </Card>
   )
 }
+
+// Also export as named export for backward compatibility
+export const QuoteForm = QuoteFormComponent

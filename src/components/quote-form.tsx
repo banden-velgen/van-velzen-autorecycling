@@ -10,8 +10,9 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { CheckCircle, AlertCircle, Loader2 } from "lucide-react"
+import { CheckCircle, AlertCircle, Loader2, Shield, Check, Car } from "lucide-react"
 import { cn } from "@/lib/utils"
+import LicensePlateInput from "@/components/license-plate-input"
 
 // Form validation schema
 const formSchema = z.object({
@@ -141,40 +142,36 @@ export default function QuoteFormComponent() {
               </Alert>
             )}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="licensePlate">{currentContent.fields.licensePlate}</Label>
-                <Input
-                  id="licensePlate"
-                  placeholder="12-ABC-3"
-                  {...form.register("licensePlate")}
-                  className={cn(
-                    form.formState.errors.licensePlate && "border-red-500"
-                  )}
-                />
-                {form.formState.errors.licensePlate && (
-                  <p className="text-sm text-red-500">
-                    {form.formState.errors.licensePlate.message}
-                  </p>
-                )}
-              </div>
+            <div className="space-y-2">
+              <Label htmlFor="licensePlate">{currentContent.fields.licensePlate}</Label>
+              <LicensePlateInput
+                id="licensePlate"
+                placeholder="XX-XX-XX"
+                {...form.register("licensePlate")}
+                error={!!form.formState.errors.licensePlate}
+              />
+              {form.formState.errors.licensePlate && (
+                <p className="text-sm text-red-500">
+                  {form.formState.errors.licensePlate.message}
+                </p>
+              )}
+            </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="name">{currentContent.fields.name}</Label>
-                <Input
-                  id="name"
-                  placeholder="Uw naam"
-                  {...form.register("name")}
-                  className={cn(
-                    form.formState.errors.name && "border-red-500"
-                  )}
-                />
-                {form.formState.errors.name && (
-                  <p className="text-sm text-red-500">
-                    {form.formState.errors.name.message}
-                  </p>
+            <div className="space-y-2">
+              <Label htmlFor="name">{currentContent.fields.name}</Label>
+              <Input
+                id="name"
+                placeholder="Uw volledige naam"
+                {...form.register("name")}
+                className={cn(
+                  form.formState.errors.name && "border-red-500"
                 )}
-              </div>
+              />
+              {form.formState.errors.name && (
+                <p className="text-sm text-red-500">
+                  {form.formState.errors.name.message}
+                </p>
+              )}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -219,7 +216,7 @@ export default function QuoteFormComponent() {
               <Label htmlFor="message">{currentContent.fields.message}</Label>
               <Textarea
                 id="message"
-                placeholder="Optionele opmerkingen over uw auto..."
+                placeholder="Eventuele toelichting over uw auto"
                 rows={3}
                 {...form.register("message")}
                 className={cn(
@@ -241,7 +238,14 @@ export default function QuoteFormComponent() {
                 className="mt-1 h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
               />
               <Label htmlFor="terms" className="text-sm leading-relaxed">
-                {currentContent.fields.terms}
+                Ik ga akkoord met de{" "}
+                <a href="/algemene-voorwaarden" className="text-primary hover:underline">
+                  algemene voorwaarden
+                </a>{" "}
+                en het{" "}
+                <a href="/privacybeleid" className="text-primary hover:underline">
+                  privacybeleid
+                </a>
               </Label>
             </div>
             {form.formState.errors.terms && (
@@ -267,11 +271,26 @@ export default function QuoteFormComponent() {
           </form>
         )}
       </CardContent>
-      <CardFooter className="bg-gray-50 px-6 py-4">
+      <CardFooter className="flex flex-col space-y-4 bg-gray-50 rounded-b-lg">
         <p className="text-sm text-gray-600">
-          <strong>Van Velzen Autorecycling</strong> is één van de marktleiders in de autodemontage branche en is als familiebedrijf zeer betrokken. 
-          Wij gaan zorgvuldig om met gegevens en privacy. Deze aanvraag is beveiligd en versleuteld d.m.v. SSL, 
-          data en/of gegevens zullen nooit worden gedeeld met derden.
+          Draag bij aan een beter milieu en verkoop jouw auto nu aan één van de grootste en duurzaamste autorecycling en demontagebedrijven in Nederland.
+        </p>
+        <div className="flex flex-col sm:flex-row justify-between gap-4 text-sm text-gray-600">
+          <div className="flex items-center gap-2">
+            <Shield className="h-5 w-5 text-primary" />
+            <span>Beveiligde aanvraag</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Check className="h-5 w-5 text-primary" />
+            <span>Vrijblijvende offerte</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Car className="h-5 w-5 text-primary" />
+            <span>Gratis ophaalservice</span>
+          </div>
+        </div>
+        <p className="text-xs text-gray-500 mt-2">
+          Van Velzen Autorecycling is één van de marktleiders in de autodemontage branche en is als familiebedrijf zeer betrokken. Wij gaan zorgvuldig om met gegevens en privacy. Deze aanvraag is beveiligd en versleuteld d.m.v. SSL, data en/of gegevens zullen nooit worden gedeeld met derden.
         </p>
       </CardFooter>
     </Card>

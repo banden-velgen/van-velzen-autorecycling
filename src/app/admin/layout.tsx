@@ -31,11 +31,16 @@ export default async function DashboardLayout({ children }: DashboardLayoutProps
     redirect("/admin/login")
   }
 
+  // Ensure user has admin permissions
+  if (!user.role || (user.role !== 'admin' && user.role !== 'super_admin')) {
+    redirect("/admin/login")
+  }
+
   // Navigation items for the dashboard
   const navItems = [
     {
       title: "Dashboard",
-      href: "/admin",
+      href: "/admin/dashboard",
       icon: "Home",
     },
     {
@@ -59,11 +64,6 @@ export default async function DashboardLayout({ children }: DashboardLayoutProps
       icon: "Calendar",
     },
     {
-      title: "Betalingen",
-      href: "/admin/payments",
-      icon: "CreditCard",
-    },
-    {
       title: "Recycling",
       href: "/admin/recycling",
       icon: "Recycle",
@@ -74,9 +74,9 @@ export default async function DashboardLayout({ children }: DashboardLayoutProps
       icon: "FolderOpen",
     },
     {
-      title: "Instellingen",
-      href: "/admin/settings",
-      icon: "Settings",
+      title: "Voorraad",
+      href: "/admin/inventory",
+      icon: "Package",
     },
   ]
 

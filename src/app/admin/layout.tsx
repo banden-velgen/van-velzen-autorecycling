@@ -31,6 +31,55 @@ export default async function DashboardLayout({ children }: DashboardLayoutProps
     redirect("/admin/login")
   }
 
+  // Navigation items for the dashboard
+  const navItems = [
+    {
+      title: "Dashboard",
+      href: "/admin",
+      icon: "Home",
+    },
+    {
+      title: "Offertes",
+      href: "/admin/quotes",
+      icon: "FileText",
+    },
+    {
+      title: "Voertuigen",
+      href: "/admin/vehicles",
+      icon: "Car",
+    },
+    {
+      title: "Klanten",
+      href: "/admin/customers",
+      icon: "Users",
+    },
+    {
+      title: "Ophaalafspraken",
+      href: "/admin/pickups",
+      icon: "Calendar",
+    },
+    {
+      title: "Betalingen",
+      href: "/admin/payments",
+      icon: "CreditCard",
+    },
+    {
+      title: "Recycling",
+      href: "/admin/recycling",
+      icon: "Recycle",
+    },
+    {
+      title: "Documenten",
+      href: "/admin/documents",
+      icon: "FolderOpen",
+    },
+    {
+      title: "Instellingen",
+      href: "/admin/settings",
+      icon: "Settings",
+    },
+  ]
+
   return (
     <div className="flex min-h-screen flex-col">
       <div className="border-b">
@@ -38,14 +87,14 @@ export default async function DashboardLayout({ children }: DashboardLayoutProps
           <MainNav />
           <div className="ml-auto flex items-center space-x-4">
             <ModeToggle />
-            <UserNav />
+            <UserNav user={user} />
           </div>
         </div>
       </div>
       <div className="flex-1 space-y-4 p-8 pt-6">
         <div className="flex flex-col space-y-8 lg:flex-row lg:space-x-12 lg:space-y-0">
           <aside className="lg:w-1/5">
-            <DashboardNav />
+            <DashboardNav items={navItems} />
           </aside>
           <div className="flex-1 lg:max-w-4xl">{children}</div>
         </div>

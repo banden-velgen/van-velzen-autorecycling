@@ -38,9 +38,7 @@
     "@radix-ui/react-toggle-group": "^1.1.10",
     "@radix-ui/react-toolbar": "^1.1.10",
     "@radix-ui/react-tooltip": "^1.2.7",
-    "@supabase/auth-helpers-nextjs": "latest",
-    "@supabase/ssr": "latest",
-    "@supabase/supabase-js": "latest",
+
     "@tailwindcss/postcss": "^4.1.11",
     "@tanstack/react-table": "latest",
     "@types/bcryptjs": "^2.4.6",

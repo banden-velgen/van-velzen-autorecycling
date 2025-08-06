@@ -1,8 +1,7 @@
 "use client"
 
 import { useRouter } from "next/navigation"
-import { createClient } from "@/lib/supabase/client"
-
+import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,30 +10,37 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { useToast } from "@/components/ui/use-toast"
+import { LogOut, User } from "lucide-react"
 
-export function UserNav() {
+interface UserNavProps {
+  user: {
+    name: string
+    email: string
+    role: string
+  }
+}
+
+export function UserNav({ user }: UserNavProps) {
   const router = useRouter()
-  const { toast } = useToast()
-  const supabase = createClient()
 
   const handleSignOut = async () => {
     try {
-      await supabase.auth.signOut()
-      toast({
-        title: "Uitgelogd",
-        description: "Je bent succesvol uitgelogd",
+      const response = await fetch('/api/auth/logout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
       })
-      router.push("/login")
+
+      if (response.ok) {
+        router.push('/admin/login')
+        router.refresh()
+      } else {
+        console.error('Logout failed')
+      }
     } catch (error) {
-      console.error("Error signing out:", error)
-      toast({
-        title: "Fout bij uitloggen",
-        description: "Er is een fout opgetreden bij het uitloggen",
-        variant: "destructive",
-      })
+      console.error('Error during logout:', error)
     }
   }
 
@@ -43,21 +49,29 @@ export function UserNav() {
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-8 w-8 rounded-full">
           <Avatar className="h-8 w-8">
-            <AvatarImage src="/placeholder.svg" alt="Avatar" />
-            <AvatarFallback>VV</AvatarFallback>
+            <AvatarImage src="/avatars/01.png" alt={user.name} />
+            <AvatarFallback>
+              <User className="h-4 w-4" />
+            </AvatarFallback>
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56" align="end" forceMount>
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium leading-none">Beheerder</p>
-            <p className="text-xs leading-none text-muted-foreground">admin@vanvelzen.nl</p>
+            <p className="text-sm font-medium leading-none">{user.name}</p>
+            <p className="text-xs leading-none text-muted-foreground">
+              {user.email}
+            </p>
+            <p className="text-xs leading-none text-muted-foreground capitalize">
+              {user.role}
+            </p>
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem className="cursor-pointer" onClick={handleSignOut}>
-          Uitloggen
+        <DropdownMenuItem onClick={handleSignOut}>
+          <LogOut className="mr-2 h-4 w-4" />
+          <span>Uitloggen</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

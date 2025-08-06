@@ -1,133 +1,143 @@
-import { createClient } from "@/lib/supabase/server"
+import pool from "@/lib/db/neon"
 
-export type FileMetadata = {
-  id: string
-  name: string
-  size: number
-  type: string
-  url: string
+export interface FileUpload {
+  file: File
   path: string
-  entity_type: "customer" | "vehicle" | "quote" | "pickup" | "recycling"
-  entity_id: string
-  created_at: string
-  updated_at: string
+  metadata?: Record<string, any>
+}
+
+export interface FileMetadata {
+  id: string
+  filename: string
+  path: string
+  size: number
+  mime_type: string
+  url?: string
+  metadata?: Record<string, any>
+  created_at: Date
 }
 
 /**
- * Uploads a file to Supabase Storage and stores metadata in the database
+ * Uploads a file and stores metadata in the database
+ * Note: This is a simplified version without cloud storage
+ * For production, you'd want to integrate with a service like AWS S3, Cloudinary, etc.
  */
-export async function uploadFile(
-  file: File,
-  entityType: "customer" | "vehicle" | "quote" | "pickup" | "recycling",
-  entityId: string,
-): Promise<FileMetadata> {
-  const supabase = createClient()
+export async function uploadFile(fileUpload: FileUpload): Promise<{ success: boolean; data?: FileMetadata; error?: string }> {
+  try {
+    const { file, path, metadata } = fileUpload
+    
+    // For now, we'll just store the metadata
+    // In production, you'd upload the actual file to cloud storage first
+    const { rows } = await pool.query(
+      `INSERT INTO file_metadata (
+        filename, 
+        path, 
+        size, 
+        mime_type, 
+        metadata, 
+        created_at
+      ) VALUES ($1, $2, $3, $4, $5, NOW()) RETURNING *`,
+      [
+        file.name,
+        path,
+        file.size,
+        file.type,
+        metadata ? JSON.stringify(metadata) : null
+      ]
+    )
 
-  // Create a unique file path
-  const timestamp = Date.now()
-  const fileExtension = file.name.split(".").pop()
-  const fileName = `${timestamp}-${file.name
-    .replace(/\.[^/.]+$/, "")
-    .replace(/[^a-z0-9]/gi, "-")
-    .toLowerCase()}.${fileExtension}`
-  const filePath = `${entityType}s/${entityId}/${fileName}`
-
-  // Upload file to Supabase Storage
-  const { data: uploadData, error: uploadError } = await supabase.storage.from("files").upload(filePath, file, {
-    cacheControl: "3600",
-    upsert: false,
-  })
-
-  if (uploadError) {
-    console.error("Error uploading file:", uploadError)
-    throw new Error(`Fout bij het uploaden van bestand: ${uploadError.message}`)
+    const fileData = rows[0]
+    
+    return {
+      success: true,
+      data: {
+        id: fileData.id,
+        filename: fileData.filename,
+        path: fileData.path,
+        size: fileData.size,
+        mime_type: fileData.mime_type,
+        metadata: fileData.metadata ? JSON.parse(fileData.metadata) : undefined,
+        created_at: fileData.created_at
+      }
+    }
+  } catch (error) {
+    console.error("Error uploading file:", error)
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : "Unknown error" 
+    }
   }
-
-  // Get public URL for the file
-  const {
-    data: { publicUrl },
-  } = supabase.storage.from("files").getPublicUrl(filePath)
-
-  // Store file metadata in the database
-  const { data: metadataData, error: metadataError } = await supabase
-    .from("file_metadata")
-    .insert({
-      name: file.name,
-      size: file.size,
-      type: file.type,
-      url: publicUrl,
-      path: filePath,
-      entity_type: entityType,
-      entity_id: entityId,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    })
-    .select()
-    .single()
-
-  if (metadataError) {
-    console.error("Error storing file metadata:", metadataError)
-    throw new Error(`Fout bij het opslaan van bestandsmetadata: ${metadataError.message}`)
-  }
-
-  return metadataData
 }
 
 /**
- * Retrieves files for a specific entity
+ * Get file metadata by ID
  */
-export async function getFiles(
-  entityType: "customer" | "vehicle" | "quote" | "pickup" | "recycling",
-  entityId: string,
-): Promise<FileMetadata[]> {
-  const supabase = createClient()
+export async function getFileMetadata(fileId: string): Promise<{ success: boolean; data?: FileMetadata; error?: string }> {
+  try {
+    const { rows } = await pool.query(
+      "SELECT * FROM file_metadata WHERE id = $1",
+      [fileId]
+    )
 
-  const { data, error } = await supabase
-    .from("file_metadata")
-    .select("*")
-    .eq("entity_type", entityType)
-    .eq("entity_id", entityId)
-    .order("created_at", { ascending: false })
+    if (rows.length === 0) {
+      return { success: false, error: "File not found" }
+    }
 
-  if (error) {
-    console.error("Error fetching files:", error)
-    throw new Error(`Fout bij het ophalen van bestanden: ${error.message}`)
+    const fileData = rows[0]
+    
+    return {
+      success: true,
+      data: {
+        id: fileData.id,
+        filename: fileData.filename,
+        path: fileData.path,
+        size: fileData.size,
+        mime_type: fileData.mime_type,
+        metadata: fileData.metadata ? JSON.parse(fileData.metadata) : undefined,
+        created_at: fileData.created_at
+      }
+    }
+  } catch (error) {
+    console.error("Error getting file metadata:", error)
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : "Unknown error" 
+    }
   }
-
-  return data as FileMetadata[]
 }
 
 /**
- * Deletes a file from storage and removes its metadata from the database
+ * Delete file and its metadata
  */
-export async function deleteFile(fileId: string): Promise<void> {
-  const supabase = createClient()
+export async function deleteFile(fileId: string): Promise<{ success: boolean; error?: string }> {
+  try {
+    // Get file metadata first
+    const { rows } = await pool.query(
+      "SELECT * FROM file_metadata WHERE id = $1",
+      [fileId]
+    )
 
-  // Get file metadata
-  const { data: fileMetadata, error: fetchError } = await supabase
-    .from("file_metadata")
-    .select("path")
-    .eq("id", fileId)
-    .single()
+    if (rows.length === 0) {
+      return { success: false, error: "File not found" }
+    }
 
-  if (fetchError) {
-    console.error("Error fetching file metadata:", fetchError)
-    throw new Error(`Fout bij het ophalen van bestandsmetadata: ${fetchError.message}`)
-  }
+    const fileMetadata = rows[0]
+    
+    // In production, you'd delete the actual file from cloud storage here
+    // For now, we'll just delete the metadata
+    
+    // Delete metadata from database
+    await pool.query(
+      "DELETE FROM file_metadata WHERE id = $1",
+      [fileId]
+    )
 
-  // Delete file from storage
-  const { error: storageError } = await supabase.storage.from("files").remove([fileMetadata.path])
-
-  if (storageError) {
-    console.error("Error deleting file from storage:", storageError)
-    throw new Error(`Fout bij het verwijderen van bestand uit opslag: ${storageError.message}`)
-  }
-
-  // Delete metadata from database
-  const { error: dbError } = await supabase.from("file_metadata").delete().eq("id", fileId)
-
-  if (dbError) {
-    console.error("Error deleting file metadata:", dbError)
-    throw new Error(`Fout bij het verwijderen van bestandsmetadata: ${dbError.message}`)
+    return { success: true }
+  } catch (error) {
+    console.error("Error deleting file:", error)
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : "Unknown error" 
+    }
   }
 }

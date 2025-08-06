@@ -83,6 +83,23 @@ CREATE TABLE IF NOT EXISTS quotes (
 );
 
 -- =====================================================
+-- USER MANAGEMENT
+-- =====================================================
+
+-- Admin users table
+CREATE TABLE IF NOT EXISTS admin_users (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  email TEXT NOT NULL UNIQUE,
+  password_hash TEXT NOT NULL,
+  name TEXT NOT NULL,
+  role TEXT DEFAULT 'admin',
+  is_active BOOLEAN DEFAULT true,
+  last_login TIMESTAMP WITH TIME ZONE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- =====================================================
 -- INVENTORY SYSTEM
 -- =====================================================
 
@@ -131,8 +148,34 @@ CREATE TABLE IF NOT EXISTS recycling (
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- Recycling records (alternative table)
+CREATE TABLE IF NOT EXISTS recycling_records (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  vehicle_id UUID REFERENCES vehicles(id) ON DELETE CASCADE,
+  customer_id UUID REFERENCES customers(id) ON DELETE CASCADE,
+  recycling_date TIMESTAMP WITH TIME ZONE NOT NULL,
+  recycling_center TEXT,
+  certificate_number TEXT,
+  status TEXT DEFAULT 'pending',
+  notes TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
 -- RDW vrijwaringen (deregistration certificates)
 CREATE TABLE IF NOT EXISTS rdw_vrijwaringen (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  vehicle_id UUID REFERENCES vehicles(id) ON DELETE CASCADE,
+  vrijwaring_number TEXT UNIQUE,
+  issue_date TIMESTAMP WITH TIME ZONE NOT NULL,
+  status TEXT DEFAULT 'active',
+  notes TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Vrijwaringen (alternative table)
+CREATE TABLE IF NOT EXISTS vrijwaringen (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   vehicle_id UUID REFERENCES vehicles(id) ON DELETE CASCADE,
   vrijwaring_number TEXT UNIQUE,
@@ -165,6 +208,20 @@ CREATE TABLE IF NOT EXISTS payments (
 -- FILE STORAGE SYSTEM
 -- =====================================================
 
+-- Files table (general files)
+CREATE TABLE IF NOT EXISTS files (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  name TEXT NOT NULL,
+  file_path TEXT NOT NULL,
+  file_type TEXT NOT NULL,
+  file_size INTEGER NOT NULL,
+  entity_type TEXT NOT NULL,
+  entity_id UUID NOT NULL,
+  uploaded_by UUID REFERENCES admin_users(id) ON DELETE SET NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
 -- Vehicle documents
 CREATE TABLE IF NOT EXISTS vehicle_documents (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -190,6 +247,29 @@ CREATE TABLE IF NOT EXISTS storage_items (
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- Storage categories
+CREATE TABLE IF NOT EXISTS storage_categories (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  name TEXT NOT NULL UNIQUE,
+  description TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Storage table (general storage)
+CREATE TABLE IF NOT EXISTS storage (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  name TEXT NOT NULL,
+  file_path TEXT NOT NULL,
+  file_type TEXT NOT NULL,
+  file_size INTEGER NOT NULL,
+  category_id UUID REFERENCES storage_categories(id) ON DELETE SET NULL,
+  entity_type TEXT NOT NULL,
+  entity_id UUID NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
 -- File metadata (for general file management)
 CREATE TABLE IF NOT EXISTS file_metadata (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -202,6 +282,35 @@ CREATE TABLE IF NOT EXISTS file_metadata (
   entity_id UUID NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- =====================================================
+-- NOTIFICATION SYSTEM
+-- =====================================================
+
+-- Notification preferences
+CREATE TABLE IF NOT EXISTS notification_preferences (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID REFERENCES admin_users(id) ON DELETE CASCADE,
+  notification_type TEXT NOT NULL,
+  email_enabled BOOLEAN DEFAULT true,
+  sms_enabled BOOLEAN DEFAULT false,
+  push_enabled BOOLEAN DEFAULT true,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  UNIQUE(user_id, notification_type)
+);
+
+-- Notification logs
+CREATE TABLE IF NOT EXISTS notification_logs (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID REFERENCES admin_users(id) ON DELETE SET NULL,
+  notification_type TEXT NOT NULL,
+  title TEXT NOT NULL,
+  message TEXT NOT NULL,
+  status TEXT DEFAULT 'sent',
+  sent_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
 -- =====================================================
@@ -252,6 +361,11 @@ CREATE INDEX IF NOT EXISTS idx_quotes_customer_id ON quotes(customer_id);
 CREATE INDEX IF NOT EXISTS idx_quotes_status ON quotes(status);
 CREATE INDEX IF NOT EXISTS idx_quotes_valid_until ON quotes(valid_until);
 
+-- Admin users indexes
+CREATE INDEX IF NOT EXISTS idx_admin_users_email ON admin_users(email);
+CREATE INDEX IF NOT EXISTS idx_admin_users_role ON admin_users(role);
+CREATE INDEX IF NOT EXISTS idx_admin_users_is_active ON admin_users(is_active);
+
 -- Inventory indexes
 CREATE INDEX IF NOT EXISTS idx_inventory_items_category_id ON inventory_items(category_id);
 CREATE INDEX IF NOT EXISTS idx_inventory_items_vehicle_id ON inventory_items(vehicle_id);
@@ -264,21 +378,47 @@ CREATE INDEX IF NOT EXISTS idx_recycling_customer_id ON recycling(customer_id);
 CREATE INDEX IF NOT EXISTS idx_recycling_status ON recycling(status);
 CREATE INDEX IF NOT EXISTS idx_recycling_date ON recycling(recycling_date);
 
+CREATE INDEX IF NOT EXISTS idx_recycling_records_vehicle_id ON recycling_records(vehicle_id);
+CREATE INDEX IF NOT EXISTS idx_recycling_records_customer_id ON recycling_records(customer_id);
+CREATE INDEX IF NOT EXISTS idx_recycling_records_status ON recycling_records(status);
+CREATE INDEX IF NOT EXISTS idx_recycling_records_date ON recycling_records(recycling_date);
+
 -- RDW vrijwaringen indexes
 CREATE INDEX IF NOT EXISTS idx_rdw_vrijwaringen_vehicle_id ON rdw_vrijwaringen(vehicle_id);
 CREATE INDEX IF NOT EXISTS idx_rdw_vrijwaringen_number ON rdw_vrijwaringen(vrijwaring_number);
 CREATE INDEX IF NOT EXISTS idx_rdw_vrijwaringen_status ON rdw_vrijwaringen(status);
+
+CREATE INDEX IF NOT EXISTS idx_vrijwaringen_vehicle_id ON vrijwaringen(vehicle_id);
+CREATE INDEX IF NOT EXISTS idx_vrijwaringen_number ON vrijwaringen(vrijwaring_number);
+CREATE INDEX IF NOT EXISTS idx_vrijwaringen_status ON vrijwaringen(status);
 
 -- Payments indexes
 CREATE INDEX IF NOT EXISTS idx_payments_quote_id ON payments(quote_id);
 CREATE INDEX IF NOT EXISTS idx_payments_status ON payments(status);
 CREATE INDEX IF NOT EXISTS idx_payments_date ON payments(payment_date);
 
+-- Files indexes
+CREATE INDEX IF NOT EXISTS idx_files_entity ON files(entity_type, entity_id);
+CREATE INDEX IF NOT EXISTS idx_files_uploaded_by ON files(uploaded_by);
+CREATE INDEX IF NOT EXISTS idx_files_type ON files(file_type);
+
 -- Document indexes
 CREATE INDEX IF NOT EXISTS idx_vehicle_documents_vehicle_id ON vehicle_documents(vehicle_id);
 CREATE INDEX IF NOT EXISTS idx_vehicle_documents_type ON vehicle_documents(document_type);
 CREATE INDEX IF NOT EXISTS idx_storage_items_entity ON storage_items(entity_type, entity_id);
 CREATE INDEX IF NOT EXISTS idx_file_metadata_entity ON file_metadata(entity_type, entity_id);
+
+-- Storage indexes
+CREATE INDEX IF NOT EXISTS idx_storage_entity ON storage(entity_type, entity_id);
+CREATE INDEX IF NOT EXISTS idx_storage_category_id ON storage(category_id);
+CREATE INDEX IF NOT EXISTS idx_storage_type ON storage(file_type);
+
+-- Notification indexes
+CREATE INDEX IF NOT EXISTS idx_notification_preferences_user_id ON notification_preferences(user_id);
+CREATE INDEX IF NOT EXISTS idx_notification_preferences_type ON notification_preferences(notification_type);
+CREATE INDEX IF NOT EXISTS idx_notification_logs_user_id ON notification_logs(user_id);
+CREATE INDEX IF NOT EXISTS idx_notification_logs_type ON notification_logs(notification_type);
+CREATE INDEX IF NOT EXISTS idx_notification_logs_sent_at ON notification_logs(sent_at);
 
 -- Activity logs indexes
 CREATE INDEX IF NOT EXISTS idx_activity_logs_entity_type ON activity_logs(entity_type);
@@ -324,6 +464,11 @@ CREATE TRIGGER update_quotes_updated_at
   FOR EACH ROW
   EXECUTE FUNCTION update_updated_at_column();
 
+CREATE TRIGGER update_admin_users_updated_at
+  BEFORE UPDATE ON admin_users
+  FOR EACH ROW
+  EXECUTE FUNCTION update_updated_at_column();
+
 CREATE TRIGGER update_inventory_categories_updated_at
   BEFORE UPDATE ON inventory_categories
   FOR EACH ROW
@@ -339,8 +484,18 @@ CREATE TRIGGER update_recycling_updated_at
   FOR EACH ROW
   EXECUTE FUNCTION update_updated_at_column();
 
+CREATE TRIGGER update_recycling_records_updated_at
+  BEFORE UPDATE ON recycling_records
+  FOR EACH ROW
+  EXECUTE FUNCTION update_updated_at_column();
+
 CREATE TRIGGER update_rdw_vrijwaringen_updated_at
   BEFORE UPDATE ON rdw_vrijwaringen
+  FOR EACH ROW
+  EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_vrijwaringen_updated_at
+  BEFORE UPDATE ON vrijwaringen
   FOR EACH ROW
   EXECUTE FUNCTION update_updated_at_column();
 
@@ -349,13 +504,33 @@ CREATE TRIGGER update_payments_updated_at
   FOR EACH ROW
   EXECUTE FUNCTION update_updated_at_column();
 
+CREATE TRIGGER update_files_updated_at
+  BEFORE UPDATE ON files
+  FOR EACH ROW
+  EXECUTE FUNCTION update_updated_at_column();
+
 CREATE TRIGGER update_storage_items_updated_at
   BEFORE UPDATE ON storage_items
   FOR EACH ROW
   EXECUTE FUNCTION update_updated_at_column();
 
+CREATE TRIGGER update_storage_categories_updated_at
+  BEFORE UPDATE ON storage_categories
+  FOR EACH ROW
+  EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_storage_updated_at
+  BEFORE UPDATE ON storage
+  FOR EACH ROW
+  EXECUTE FUNCTION update_updated_at_column();
+
 CREATE TRIGGER update_file_metadata_updated_at
   BEFORE UPDATE ON file_metadata
+  FOR EACH ROW
+  EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_notification_preferences_updated_at
+  BEFORE UPDATE ON notification_preferences
   FOR EACH ROW
   EXECUTE FUNCTION update_updated_at_column();
 
@@ -369,14 +544,22 @@ ALTER TABLE customers ENABLE ROW LEVEL SECURITY;
 ALTER TABLE vehicles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE pickups ENABLE ROW LEVEL SECURITY;
 ALTER TABLE quotes ENABLE ROW LEVEL SECURITY;
+ALTER TABLE admin_users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE inventory_categories ENABLE ROW LEVEL SECURITY;
 ALTER TABLE inventory_items ENABLE ROW LEVEL SECURITY;
 ALTER TABLE recycling ENABLE ROW LEVEL SECURITY;
+ALTER TABLE recycling_records ENABLE ROW LEVEL SECURITY;
 ALTER TABLE rdw_vrijwaringen ENABLE ROW LEVEL SECURITY;
+ALTER TABLE vrijwaringen ENABLE ROW LEVEL SECURITY;
 ALTER TABLE payments ENABLE ROW LEVEL SECURITY;
+ALTER TABLE files ENABLE ROW LEVEL SECURITY;
 ALTER TABLE vehicle_documents ENABLE ROW LEVEL SECURITY;
 ALTER TABLE storage_items ENABLE ROW LEVEL SECURITY;
+ALTER TABLE storage_categories ENABLE ROW LEVEL SECURITY;
+ALTER TABLE storage ENABLE ROW LEVEL SECURITY;
 ALTER TABLE file_metadata ENABLE ROW LEVEL SECURITY;
+ALTER TABLE notification_preferences ENABLE ROW LEVEL SECURITY;
+ALTER TABLE notification_logs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE activity_logs ENABLE ROW LEVEL SECURITY;
 
 -- =====================================================
@@ -412,6 +595,10 @@ CREATE POLICY "Allow authenticated users to manage pickups"
 CREATE POLICY "Allow authenticated users to manage quotes"
   ON quotes FOR ALL TO authenticated USING (true) WITH CHECK (true);
 
+-- Admin users policies
+CREATE POLICY "Allow authenticated users to manage admin_users"
+  ON admin_users FOR ALL TO authenticated USING (true) WITH CHECK (true);
+
 -- Inventory categories policies
 CREATE POLICY "Allow authenticated users to manage inventory_categories"
   ON inventory_categories FOR ALL TO authenticated USING (true) WITH CHECK (true);
@@ -424,13 +611,23 @@ CREATE POLICY "Allow authenticated users to manage inventory_items"
 CREATE POLICY "Allow authenticated users to manage recycling"
   ON recycling FOR ALL TO authenticated USING (true) WITH CHECK (true);
 
+CREATE POLICY "Allow authenticated users to manage recycling_records"
+  ON recycling_records FOR ALL TO authenticated USING (true) WITH CHECK (true);
+
 -- RDW vrijwaringen policies
 CREATE POLICY "Allow authenticated users to manage rdw_vrijwaringen"
   ON rdw_vrijwaringen FOR ALL TO authenticated USING (true) WITH CHECK (true);
 
+CREATE POLICY "Allow authenticated users to manage vrijwaringen"
+  ON vrijwaringen FOR ALL TO authenticated USING (true) WITH CHECK (true);
+
 -- Payments policies
 CREATE POLICY "Allow authenticated users to manage payments"
   ON payments FOR ALL TO authenticated USING (true) WITH CHECK (true);
+
+-- Files policies
+CREATE POLICY "Allow authenticated users to manage files"
+  ON files FOR ALL TO authenticated USING (true) WITH CHECK (true);
 
 -- Vehicle documents policies
 CREATE POLICY "Allow authenticated users to manage vehicle_documents"
@@ -440,9 +637,25 @@ CREATE POLICY "Allow authenticated users to manage vehicle_documents"
 CREATE POLICY "Allow authenticated users to manage storage_items"
   ON storage_items FOR ALL TO authenticated USING (true) WITH CHECK (true);
 
+-- Storage categories policies
+CREATE POLICY "Allow authenticated users to manage storage_categories"
+  ON storage_categories FOR ALL TO authenticated USING (true) WITH CHECK (true);
+
+-- Storage policies
+CREATE POLICY "Allow authenticated users to manage storage"
+  ON storage FOR ALL TO authenticated USING (true) WITH CHECK (true);
+
 -- File metadata policies
 CREATE POLICY "Allow authenticated users to manage file_metadata"
   ON file_metadata FOR ALL TO authenticated USING (true) WITH CHECK (true);
+
+-- Notification preferences policies
+CREATE POLICY "Allow authenticated users to manage notification_preferences"
+  ON notification_preferences FOR ALL TO authenticated USING (true) WITH CHECK (true);
+
+-- Notification logs policies
+CREATE POLICY "Allow authenticated users to manage notification_logs"
+  ON notification_logs FOR ALL TO authenticated USING (true) WITH CHECK (true);
 
 -- Activity logs policies
 CREATE POLICY "Allow authenticated users to manage activity_logs"
@@ -466,6 +679,20 @@ INSERT INTO inventory_categories (name, description) VALUES
   ('Brandstof', 'Brandstofsystemen en onderdelen')
 ON CONFLICT (name) DO NOTHING;
 
+-- Insert sample storage categories
+INSERT INTO storage_categories (name, description) VALUES
+  ('Documents', 'Document files and paperwork'),
+  ('Images', 'Image files and photos'),
+  ('Videos', 'Video files and recordings'),
+  ('Archives', 'Compressed and archive files'),
+  ('Templates', 'Template files and forms')
+ON CONFLICT (name) DO NOTHING;
+
+-- Insert default admin user (password: admin123)
+INSERT INTO admin_users (email, password_hash, name, role) VALUES
+  ('admin@vanvelzenautorecycling.nl', crypt('admin123', gen_salt('bf')), 'Administrator', 'admin')
+ON CONFLICT (email) DO NOTHING;
+
 -- =====================================================
 -- COMMENTS
 -- =====================================================
@@ -475,14 +702,22 @@ COMMENT ON TABLE customers IS 'Customer information and contact details';
 COMMENT ON TABLE vehicles IS 'Vehicle information linked to customers';
 COMMENT ON TABLE pickups IS 'Pickup scheduling and management';
 COMMENT ON TABLE quotes IS 'Admin-generated quotes for customers';
+COMMENT ON TABLE admin_users IS 'Admin user accounts and authentication';
 COMMENT ON TABLE inventory_categories IS 'Categories for inventory items';
 COMMENT ON TABLE inventory_items IS 'Inventory items for sale';
 COMMENT ON TABLE recycling IS 'Vehicle recycling records';
+COMMENT ON TABLE recycling_records IS 'Alternative vehicle recycling records';
 COMMENT ON TABLE rdw_vrijwaringen IS 'RDW deregistration certificates';
+COMMENT ON TABLE vrijwaringen IS 'Alternative deregistration certificates';
 COMMENT ON TABLE payments IS 'Payment records for quotes';
+COMMENT ON TABLE files IS 'General file storage';
 COMMENT ON TABLE vehicle_documents IS 'Documents linked to vehicles';
 COMMENT ON TABLE storage_items IS 'General file storage items';
+COMMENT ON TABLE storage_categories IS 'Categories for storage items';
+COMMENT ON TABLE storage IS 'General storage system';
 COMMENT ON TABLE file_metadata IS 'File metadata for general file management';
+COMMENT ON TABLE notification_preferences IS 'User notification preferences';
+COMMENT ON TABLE notification_logs IS 'Notification delivery logs';
 COMMENT ON TABLE activity_logs IS 'Audit trail for admin activities';
 
 -- =====================================================

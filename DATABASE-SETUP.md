@@ -15,21 +15,33 @@ The database includes the following main components:
 - **`pickups`** - Pickup scheduling and management
 - **`quotes`** - Admin-generated quotes for customers
 
+### User Management
+- **`admin_users`** - Admin user accounts and authentication
+
 ### Inventory Management
 - **`inventory_categories`** - Categories for inventory items
 - **`inventory_items`** - Inventory items for sale
 
 ### Recycling System
 - **`recycling`** - Vehicle recycling records
+- **`recycling_records`** - Alternative vehicle recycling records
 - **`rdw_vrijwaringen`** - RDW deregistration certificates
+- **`vrijwaringen`** - Alternative deregistration certificates
 
 ### Payment System
 - **`payments`** - Payment records for quotes
 
 ### File Storage
+- **`files`** - General file storage
 - **`vehicle_documents`** - Documents linked to vehicles
 - **`storage_items`** - General file storage items
+- **`storage_categories`** - Categories for storage items
+- **`storage`** - General storage system
 - **`file_metadata`** - File metadata for general file management
+
+### Notification System
+- **`notification_preferences`** - User notification preferences
+- **`notification_logs`** - Notification delivery logs
 
 ### Audit & Logging
 - **`activity_logs`** - Audit trail for admin activities

@@ -6,7 +6,7 @@ import { useState, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Upload, FileText, Image, FileIcon, Trash2 } from "lucide-react"
-import { uploadFileAction, deleteFileAction, getFilesAction } from "@/app/actions/file-actions"
+import { uploadFile, deleteFile, getFiles } from "@/app/actions/storage-actions"
 import { useToast } from "@/hooks/use-toast"
 import type { FileMetadata } from "@/lib/utils/file-storage"
 
@@ -44,7 +44,7 @@ export function FileUpload({
     formData.append("file", file)
 
     try {
-      const result = await uploadFileAction(formData, entityType, entityId)
+      const result = await uploadFile(formData, entityType, entityId)
 
       if (result.success && result.file) {
         setFiles((prevFiles) => [result.file!, ...prevFiles])
@@ -82,7 +82,7 @@ export function FileUpload({
     }
 
     try {
-      const result = await deleteFileAction(fileId, entityType, entityId)
+      const result = await deleteFile(fileId, entityType, entityId)
 
       if (result.success) {
         setFiles((prevFiles) => prevFiles.filter((file) => file.id !== fileId))
@@ -108,7 +108,7 @@ export function FileUpload({
 
   const refreshFiles = async () => {
     try {
-      const result = await getFilesAction(entityType, entityId)
+      const result = await getFiles(entityType, entityId)
 
       if (result.success && result.files) {
         setFiles(result.files)

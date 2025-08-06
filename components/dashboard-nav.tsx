@@ -4,7 +4,6 @@ import type React from "react"
 
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
-import { createClient } from "@/lib/supabase/client"
 import { useToast } from "@/components/ui/use-toast"
 
 import { cn } from "@/lib/utils"
@@ -18,16 +17,19 @@ interface NavItem {
   disabled?: boolean
 }
 
-export function DashboardNav() {
+interface DashboardNavProps {
+  navItems?: NavItem[]
+}
+
+export function DashboardNav({ navItems = [] }: DashboardNavProps) {
   const pathname = usePathname()
   const router = useRouter()
   const { toast } = useToast()
-  const supabase = createClient()
 
-  const navItems: NavItem[] = [
+  const defaultNavItems: NavItem[] = [
     {
       title: "Dashboard",
-      href: "/admin",
+      href: "/admin/dashboard",
       icon: <Home className="mr-2 h-4 w-4" />,
     },
     {
@@ -41,31 +43,34 @@ export function DashboardNav() {
       icon: <Car className="mr-2 h-4 w-4" />,
     },
     {
-      title: "Ophaalafspraken",
-      href: "/admin/pickups",
-      icon: <Truck className="mr-2 h-4 w-4" />,
-    },
-    {
-      title: "Documenten",
-      href: "/admin/documents",
+      title: "Klanten",
+      href: "/admin/customers",
       icon: <FileText className="mr-2 h-4 w-4" />,
     },
     {
-      title: "Instellingen",
-      href: "/admin/settings",
-      icon: <Settings className="mr-2 h-4 w-4" />,
-      disabled: true,
+      title: "Recycling",
+      href: "/admin/recycling",
+      icon: <Recycle className="mr-2 h-4 w-4" />,
     },
   ]
 
+  const items = navItems.length > 0 ? navItems : defaultNavItems
+
   const handleSignOut = async () => {
     try {
-      await supabase.auth.signOut()
-      toast({
-        title: "Uitgelogd",
-        description: "Je bent succesvol uitgelogd",
+      const response = await fetch('/api/auth/logout', {
+        method: 'POST',
       })
-      router.push("/login")
+      
+      if (response.ok) {
+        toast({
+          title: "Uitgelogd",
+          description: "Je bent succesvol uitgelogd",
+        })
+        router.push("/admin/login")
+      } else {
+        throw new Error('Logout failed')
+      }
     } catch (error) {
       console.error("Error signing out:", error)
       toast({
